@@ -2,12 +2,13 @@ The MIT License (MIT)
 
 Basis for CoprHD Provisioning and Scripts provided by:
 https://github.com/vchrisb/vagrant-coprhd
+based on commit: c789ab927b491da1d08a8e69e0095b635c862541
 scripts/build.sh, scripts/install.sh, scripts/packages.sh
 Copyright (c) 2015 Christopher Banck
 
 Basis for ScaleIO Provisioning and Scripts provided by:
 https://github.com/jonasrosland/vagrant-scaleio
-Vagrantfile was based off of Jonas' original work as well.
+based on commit: 543b304dae2c3cdcda86ce1670c28befe67245a8
 Files: scripts/mdm1.sh, scripts/mdm2.sh, scripts/tb.sh and Vagrantfile
 Copyright (c) 2015 Jonas Rosland
 
