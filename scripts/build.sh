@@ -59,6 +59,8 @@ if [ "$build" = true ] || [ ! -e /vagrant/*.rpm ]; then
   cd /tmp
   git clone https://review.coprhd.org/scm/ch/coprhd-controller.git
   # Get Required Packages
+  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installRepositories
+  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installPackages
   bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installNginx
   bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installJava 8
   bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installStorageOS

@@ -40,8 +40,8 @@ ch_node_ip = "#{network}.11"
 ch_virtual_ip = "#{network}.10"
 ch_gw_ip = "#{network}.1"
 build = true
-ch_vagrantbox = "officialCoprHDBox"
-ch_vagrantboxurl = "https://build.coprhd.org/jenkins/userContent/DevKits/3.0.0.0.26/CoprHDDevKit.x86_64-3.0.0.0.26.box"
+ch_vagrantbox = "vchrisb/openSUSE-13.2_64"
+ch_vagrantboxurl = "https://atlas.hashicorp.com/vchrisb/boxes/openSUSE-13.2_64/versions/0.1.3/providers/virtualbox.box"
 
 # Simulated Backend - set to true to get VNX/VMAX Simulated Backends
 smis_simulator = false
@@ -195,7 +195,6 @@ Vagrant.configure("2") do |config|
      coprhd.vm.box_url = "#{ch_vagrantboxurl}"
      coprhd.vm.host_name = "coprhd1"
      coprhd.vm.network "private_network", ip: "#{ch_node_ip}"
-     coprhd.vm.base_mac = "003EDAF3870D"
 
      # configure virtualbox provider
      coprhd.vm.provider "virtualbox" do |v|
@@ -205,6 +204,16 @@ Vagrant.configure("2") do |config|
          v.cpus = 4
      end
 
+     # Setup Swap space
+     coprhd.vm.provision "shell" do |s|
+      s.path = "scripts/swap.sh"
+     end
+
+     # install necessary packages
+     coprhd.vm.provision "shell" do |s|
+      s.path = "scripts/packages.sh"
+      s.args   = "--build #{build}"
+     end
      # download and compile CoprHD from sources
      coprhd.vm.provision "shell" do |s|
       s.path = "scripts/build.sh"
@@ -237,6 +246,7 @@ Vagrant.configure("2") do |config|
      end
 
      coprhd.vm.provision "shell", inline: "service network restart", run: "always"
+     coprhd.vm.provision "shell", inline: "service sshd restart", run: "always"
 
   end
 end
