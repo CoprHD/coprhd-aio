@@ -52,19 +52,13 @@ done
 
 if [[ -n "${http_proxy_setting}" || -n "${https_proxy_setting}" ]]; then
     export JAVA_TOOL_OPTIONS="-Dhttp.proxyHost=${http_proxy_setting} -Dhttp.proxyPort=${http_proxy_port} -Dhttps.proxyHost=${https_proxy_setting} -Dhttps.proxyPort=${https_proxy_port}"
+    echo JAVA_TOOL_OPTIONS=\""-Dhttp.proxyHost=${http_proxy_setting} -Dhttp.proxyPort=${http_proxy_port} -Dhttps.proxyHost=${https_proxy_setting} -Dhttps.proxyPort=${https_proxy_port}\"" >> /etc/environment
 fi
 
 if [ "$build" = true ] || [ ! -e /vagrant/*.rpm ]; then
   # Download CoprHD Source
   cd /tmp
   git clone https://review.coprhd.org/scm/ch/coprhd-controller.git
-  # Get Required Packages
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installRepositories
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installPackages
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installNginx
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installJava 8
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installStorageOS
-  bash coprhd-controller/packaging/appliance-images/openSUSE/13.2/CoprHDDevKit/configure.sh installNetworkConfigurationFile
 
   # Create ovfenv file
   cat > /etc/ovfenv.properties << EOF
@@ -79,6 +73,8 @@ network_vip=$VIP
 node_count=$COUNT
 node_id=$ID
 EOF
+  # Update Cron and Cronie before install
+  zypper --cache-dir /tmp/pkg-cache -n install cron-4.2-56.8.1.x86_64 cronie-1.4.12-56.8.1.x86_64
   cd coprhd-controller
   make clobber BUILD_TYPE=oss rpm
   rm -f /vagrant/storageos*.rpm
