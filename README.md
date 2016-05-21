@@ -1,19 +1,17 @@
-vagrant-coprhd-scaleio-devstack
+vagrant-coprhd-scaleio
 ---------------
 
 # Description
-## Three Branches: 
-### master (4 VMs: ScaleIO (3) + CoprHD on OpenSUSE (1))
-### feature-add-ubuntu: (4 VMs: ScaleIO (3) + CoprHD on Ubuntu 14.04(1))
-### devstack-integration (5 VMs: same as master + Kilo Devstack (1))
-Master branch includes: Vagrant environment for 3 ScaleIO VMs and 1 CoprHD VM
-Devstack-integration branch includes: Master branch VMs + Kilo-based DevStack VM.  Modify the Vagrantfile as needed to configure the network, passwords, etc for your desired setup.
+This repo provides a [Vagrant](https://www.vagrantup.com/) environment for CoprHD and ScaleIO.  It's intended for Developers/Users to get up and running quickly with CoprHD and a storage backend that can be discovered, provisioned, and used for block volume operations.  The Vagrantfile describes the four Virtual Machines that will be created under VirtualBox.  One VM is for CoprHD and three VMs are for the ScaleIO Cluster.
+
 
 # Prerequisites
-* vagrant
+* [Vagrant](https://www.vagrantup.com/)
   * Nice-to-have: vagrant-cachier for caching packages - really speeds up subsequent installs
   * `vagrant plugin install vagrant-cachier`
-* virtualbox
+  * NOTE: If you're installing behind a proxy, you'll need vagrant-proxyconf:
+  * `vagrant plugin install vagrant-proxyconf`
+* [Virtualbox](https://www.virtualbox.org/)
 
 # Usage
 * Modify the Vagrantfile for the Host-only network you want to create/use for all VMs
@@ -21,30 +19,35 @@ Devstack-integration branch includes: Master branch VMs + Kilo-based DevStack VM
   * `vagrant up`
 * Launch only a subset of VM(s)
   * `vagrant up [VM]`
-  * [VM] is one or more of: tb, mdm1, mdm2, coprhd  (or devstack on devstack-integration branch)
-  * e.g. To launch only the ScaleIO Cluster: 'vagrant up tb mdm1 mdm2'
-  * NOTE: For ScaleIO Cluster provisioning on the first boot, you MUST have mdm2 the last in the list as it does all the cluster creation during provisioning so the other nodes must be running.
+  * [VM] is one or more of: tb, mdm1, mdm2, coprhd
+  * e.g. To launch only CoprHD: `vagrant up coprhd`
+  * e.g. To launch only the ScaleIO Cluster: `vagrant up tb mdm1 mdm2`
+  * NOTE: For ScaleIO Cluster provisioning on the first boot, you MUST have mdm2 as the last in the list as it does all the cluster creation during provisioning so the other nodes must be running.
 
 # Access the VMs
 * `vagrant ssh [VM]`
-  * [VM] is one of tb, mdm1, mdm2, coprhd (or devstack on the devstack-integration branch)
-  * NOTE: Default ssh user is 'vagrant'.  CoprHD sets up services using storageos user.
+  * [VM] is one of tb, mdm1, mdm2, coprhd
+  * NOTE: Default ssh user is 'vagrant'.  CoprHD sets up services using a user named 'storageos'.
   * You can either `su storageos` after SSH'ing into CoprHD or you can use this command:
   * `vagrant ssh coprhd -- -l storageos` with the password 'vagrant' to login to CoprHD
 
-# CoprHD Access/Changes
+# Modify CoprHD Source and Recompile:
 * Login to the CoprHD VM:
   * `vagrant ssh coprhd -- -l storageos`  # P: vagrant
+* Change to root:
+  * `su -` # P: ChangeMe
 * Stop CoprHD services
   * `sudo /etc/storageos/storageos stop`
-* CoprHD source code is in: /tmp/coprhd-controller/
+* Optional: If you want to wipe the database and log files:
+	* `/vagrant/clean_slate_coprhd.sh`
+* CoprHD source code is in:
+	* 	`cd /tmp/coprhd-controller/`
 * Checked out branch is: master
-* Make changes and recompile:
+* Make changes and then recompile:
   * `sudo make clobber BUILD_TYPE=oss rpm`
 
-# CoprHD Cli Scripts (https://github.com/curtbruns/coprhd_cli_scripts)
+# [CoprHD Cli Scripts](https://github.com/curtbruns/coprhd_cli_scripts)
 # CLI to configure CoprHD with ScaleIO as backend
-## NOTE: This doesn't work with CoprHD on Ubuntu yet - stick to master branch
 
 ## Location
 * coprhd_cli_scripts are cloned in /opt/storageos/coprhd_cli_scripts
@@ -52,24 +55,14 @@ Devstack-integration branch includes: Master branch VMs + Kilo-based DevStack VM
 ##Execution Flow
 * Make sure coprhd_settings matches your environment (Passwords, URLs, etc)
 * Source the coprhd_settings file
-* Choose your desired Config below - either Config1 or Config2
 
-## Config1: CoprHD Setup with ScaleIO (Easy Button)
+## Check CoprHD Setup
+* ./coprhd -c
+
+## Setup CoprHD and ScaleIO
 * ./coprhd -s
 * This will add: ScaleIO as a Storage Provider/Backend, ScaleIO network, Virtual Array and Create a ThickSATA Virtual Pool
-
-## Config2: CoprHD Setup with ScaleIO and Devstack and Keystone as Auth Provider
-###Note: You must be on the devstack-integration branch which includes the devstack VM
-* ./coprhd -o
-* This will perform everything in the (Easy Button) step, plus:
-* Register Keystone as Auth provider
-* Add Admin Tenant and Project
-* Update Devstack to use CoprHD as Volume Service
 
 ## Tear Everything Down
 * ./coprhd -d
 * This will delete all traces of CoprHD setup (remove Auth provider, VPool, Varray, Project, Tenant)
-  * Note: This doesn't revert the Keystone Endpoint back to Using Cinder as VolumeV2 service
-
-## Check CoprHD Setup
-* ./coprhd -c
