@@ -1,4 +1,9 @@
 #!/bin/bash
+#
+# This script is used to uninstall CoprHD, delete the database, and clear out
+# the log files.
+#
+
 # Run as Root!
 if [[ $UID -ne 0 ]]; then
    echo "Must run as root"
@@ -7,6 +12,10 @@ fi
 
 # Stop Services
 /etc/storageos/storageos stop
+
+# Remove CoprHD
+echo "Uninstalling CoprHD"
+rpm -e storageos
 
 # Delete Database and all Data
 sleep 2
@@ -25,10 +34,6 @@ su storageos -c "> /opt/storageos/logs/coordinatorsvc.log"
 su storageos -c "> /opt/storageos/logs/portalsvc.log"
 su storageos -c "> /opt/storageos/logs/geodbsvc.log"
 su storageos -c "> /opt/storageos/logs/dbsvc.log"
-
-# Remove CoprHD
-echo "Uninstalling CoprHD"
-rpm -e storageos
 
 echo "Not restarting the services...do what you need to do..."
 echo "If you're going to build, this is the command:"

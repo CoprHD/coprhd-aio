@@ -40,8 +40,8 @@ ch_node_ip = "#{network}.11"
 ch_virtual_ip = "#{network}.10"
 ch_gw_ip = "#{network}.1"
 build = true
-ch_vagrantbox = "3.5.0.0.29_CoprHDBox"
-ch_vagrantboxurl = "https://build.coprhd.org/jenkins/userContent/DevKits/3.5.0.0.29/CoprHDDevKit.x86_64-3.5.0.0.29.box"
+ch_vagrantbox = "3.5.0.0.30_CoprHDBox"
+ch_vagrantboxurl = "https://build.coprhd.org/jenkins/userContent/DevKits/3.5.0.0.30/CoprHDDevKit.x86_64-3.5.0.0.30.box"
 
 # Simulated Backend - set to true to get VNX/VMAX Simulated Backends
 smis_simulator = false
